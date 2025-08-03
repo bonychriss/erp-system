@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Accounting Module</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input, select {
+      margin-bottom: 15px;
+      padding: 8px;
+      width: 100%;
+      max-width: 300px;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h1>Accounting Entry</h1>
+  <form id="accountingForm">
+    <label for="type">Type:</label>
+    <select id="type" required>
+      <option value="income">Income</option>
+      <option value="expense">Expense</option>
+    </select>
+
+    <label for="amount">Amount:</label>
+    <input type="number" id="amount" required />
+
+    <label for="description">Description:</label>
+    <input type="text" id="description" required />
+
+    <label for="date">Date:</label>
+    <input type="date" id="date" required />
+
+    <input type="hidden" id="companyId" value="1" /> <!-- Example companyId -->
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <script src="accounting.js"></script>
+</body>
+</html>

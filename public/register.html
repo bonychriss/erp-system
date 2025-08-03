@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register - ERP System</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom right, #f0f2f5, #dfe6e9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: white;
+      padding: 25px 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 400px;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      color: #2c3e50;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #34495e;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 0.9rem;
+    }
+
+    small {
+      font-size: 0.75rem;
+      color: #888;
+    }
+
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 10px;
+      background-color: #3498db;
+      color: white;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    button:disabled {
+      background-color: #95b8db;
+      cursor: not-allowed;
+    }
+
+    .error {
+      color: red;
+      font-size: 0.8rem;
+      margin-top: 8px;
+      min-height: 20px;
+      text-align: center;
+    }
+
+    .terms {
+      font-size: 0.7rem;
+      color: #555;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    @media (max-height: 600px) {
+      body {
+        align-items: flex-start;
+        padding-top: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Register Your ERP Account</h2>
+    <form id="register-form" novalidate>
+      <label for="name">Full Name
+        <input type="text" id="name" required />
+      </label>
+
+      <label for="email">Email
+        <input type="email" id="email" required />
+      </label>
+
+      <label for="password">Password
+        <input type="password" id="password" required minlength="6" />
+        <small>Password must be at least 6 characters</small>
+      </label>
+
+      <label for="role">Select Role
+        <select id="role" required>
+          <option value="" disabled selected>Choose role</option>
+          <option value="admin">Admin</option>
+          <option value="manager">Manager</option>
+          <option value="employee">Employee</option>
+        </select>
+      </label>
+
+      <label for="department">Department
+        <select id="department" required>
+          <option value="" disabled selected>Choose department</option>
+          <option value="finance">Finance</option>
+          <option value="sales">Sales</option>
+          <option value="it">IT</option>
+          <option value="hr">HR</option>
+          <option value="marketing">Marketing</option>
+          <option value="procurement">Procurement</option>
+          <option value="inventory">Inventory</option>
+          <option value="logistics">Logistics</option>
+          <option value="customer-service">Customer Service</option>
+          <option value="operations">Operations</option>
+        </select>
+      </label>
+
+      <label for="company">Create Your 8-Digit Company ID
+        <input 
+          type="text" 
+          id="company" 
+          placeholder="e.g. 12345678" 
+          required 
+          pattern="\d{8}" 
+          maxlength="8"
+          oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);" 
+        />
+        <small>This unique 8-digit number identifies your company. Only you will have access to it.</small>
+      </label>
+
+      <div class="terms">
+        By registering, you agree to our 
+        <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.
+      </div>
+
+      <button type="submit" id="submit-btn" disabled>Register</button>
+      <p id="register-error" class="error"></p>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('register-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const errorEl = document.getElementById('register-error');
+
+    function validateForm() {
+      errorEl.textContent = '';
+
+      const name = form.name.value.trim();
+      const email = form.email.value.trim();
+      const password = form.password.value;
+      const role = form.role.value;
+      const department = form.department.value;
+      const company = form.company.value.trim();
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const companyRegex = /^\d{8}$/;
+
+      let valid = true;
+
+      if (name.length < 2) valid = false;
+      if (!emailRegex.test(email)) valid = false;
+      if (password.length < 6) valid = false;
+      if (!role) valid = false;
+      if (!department) valid = false;
+      if (!companyRegex.test(company)) valid = false;
+
+      submitBtn.disabled = !valid;
+    }
+
+    form.addEventListener('input', validateForm);
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.textContent = '';
+
+      const userData = {
+        name: form.name.value.trim(),
+        email: form.email.value.trim(),
+        password: form.password.value,
+        role: form.role.value,
+        department: form.department.value,
+        company: form.company.value.trim(),
+      };
+
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/register', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(userData)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          errorEl.textContent = data.message || 'Registration failed. Please try again.';
+        } else {
+          alert('Registration successful! Redirecting to login...');
+          window.location.href = 'login.html';
+        }
+      } catch (error) {
+        errorEl.textContent = 'Server error. Please try again later.';
+        console.error(error);
+      }
+    });
+
+    validateForm(); // initial check on page load
+  </script>
+</body>
+</html>

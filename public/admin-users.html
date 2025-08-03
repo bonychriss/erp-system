@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin User Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 2rem auto;
+      background: #f9f9f9;
+      padding: 1rem;
+    }
+    h1 {
+      text-align: center;
+      color: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 2rem;
+      background: white;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #0077cc;
+      color: white;
+    }
+    select, button {
+      padding: 6px 10px;
+      margin-right: 0.5rem;
+    }
+    button {
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #005fa3;
+    }
+    .message {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-weight: bold;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin User Management</h1>
+  <div class="message" id="message"></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Company ID</th>
+        <th>Department</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="userTableBody">
+      <!-- Users will load here -->
+    </tbody>
+  </table>
+
+  <script>
+    const token = localStorage.getItem('token'); // Assumes admin saved token on login
+
+    // Load users from backend
+    async function loadUsers() {
+      try {
+        const res = await fetch('http://localhost:5000/api/users', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!res.ok) throw new Error('Failed to fetch users');
+
+        const users = await res.json();
+        const tbody = document.getElementById('userTableBody');
+        tbody.innerHTML = '';
+
+        users.forEach(user => {
+          tbody.innerHTML += `
+            <tr data-id="${user.id}">
+              <td>${user.name}</td>
+              <td>${user.email}</td>
+              <td>
+                <select class="role-select">
+                  <option value="visitor" ${user.role === 'visitor' ? 'selected' : ''}>Visitor</option>
+                  <option value="employee" ${user.role === 'employee' ? 'selected' : ''}>Employee</option>
+                  <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>Manager</option>
+                  <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                </select>
+              </td>
+              <td><input type="number" class="company-input" value="${user.companyId || ''}" /></td>
+              <td><input type="text" class="department-input" value="${user.department || ''}" /></td>
+              <td><button onclick="updateUser(${user.id}, this)">Update</button></td>
+            </tr>
+          `;
+        });
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    // Update user info on button click
+    async function updateUser(userId, btn) {
+      const row = btn.closest('tr');
+      const role = row.querySelector('.role-select').value;
+      const companyId = row.querySelector('.company-input').value;
+      const department = row.querySelector('.department-input').value;
+
+      btn.disabled = true;
+      btn.textContent = 'Updating...';
+
+      try {
+        const res = await fetch(`http://localhost:5000/api/users/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ role, companyId, department })
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.message || 'Update failed');
+
+        document.getElementById('message').textContent = 'User updated successfully!';
+      } catch (error) {
+        alert(error.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Update';
+      }
+    }
+
+    // Run on page load
+    window.onload = () => {
+      if (!token) {
+        alert('Please log in as admin first.');
+        return;
+      }
+      loadUsers();
+    };
+  </script>
+</body>
+</html>

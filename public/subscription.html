@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <title>ERP System Preview & Subscription</title>
+  <style>
+    /* Reset and base */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #eef2f7;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+      flex-direction: column;
+    }
+
+    .container {
+      background: #fff;
+      padding: 2.5rem 3.5rem;
+      border-radius: 12px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+      width: 100%;
+      max-width: 520px;
+      transition: box-shadow 0.3s ease;
+      margin-bottom: 4rem;
+    }
+    .container:hover {
+      box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #0056b3;
+      font-weight: 700;
+      font-size: 1.9rem;
+      letter-spacing: 0.04em;
+    }
+
+    ul {
+      margin-bottom: 2rem;
+      padding-left: 1.3rem;
+      list-style-type: none;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    ul li {
+      margin-bottom: 0.9rem;
+      font-weight: 600;
+      position: relative;
+      padding-left: 1.8rem;
+      color: #0077cc;
+      font-size: 1rem;
+    }
+    ul li::before {
+      content: "✔";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: #28a745;
+      font-weight: bold;
+      font-size: 1.2rem;
+      line-height: 1;
+      transform: translateY(2px);
+    }
+
+    #welcomeMsg {
+      text-align: center; 
+      font-weight: 700; 
+      font-size: 1.15rem; 
+      margin-bottom: 1rem; 
+      color: #0056b3;
+      user-select: none;
+    }
+
+    .company-info {
+      font-size: 1rem;
+      color: #444;
+      margin-bottom: 1.8rem;
+      text-align: center;
+      font-weight: 600;
+      background: #f0f5ff;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #d0dbf7;
+      user-select: none;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #0056b3;
+    }
+
+    select, input[type="date"] {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      margin-bottom: 1.8rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1.8px solid #cbd4e7;
+      transition: border-color 0.3s ease;
+      outline-offset: 2px;
+      outline-color: transparent;
+    }
+    select:focus, input[type="date"]:focus {
+      border-color: #0056b3;
+      outline-color: #0056b3;
+      outline-style: solid;
+    }
+
+    .price {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      font-weight: 700;
+      text-align: center;
+      color: #003d99;
+      user-select: none;
+      min-height: 1.5em;
+    }
+
+    button {
+      width: 100%;
+      padding: 1.05rem;
+      background-color: #0077cc;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,119,204,0.4);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      user-select: none;
+    }
+    button:hover {
+      background-color: #005fa3;
+      box-shadow: 0 6px 14px rgba(0,95,163,0.6);
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+
+    /* Floating WhatsApp icon */
+    #whatsappIcon {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 60px;
+      height: 60px;
+      background-color: #25D366;
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background-color 0.3s ease;
+      z-index: 1000;
+    }
+    #whatsappIcon:hover {
+      background-color: #1ebe57;
+    }
+    #whatsappIcon img {
+      width: 32px;
+      height: 32px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Welcome to Our ERP System</h2>
+    <div id="welcomeMsg">Loading user info...</div>
+    <div class="company-info" id="companyInfo">Detecting company info...</div>
+
+    <h3>Subscription Plan Features</h3>
+    <ul>
+      <li>Access to all ERP features</li>
+      <li>Real-time dashboards & analytics</li>
+      <li>Secure company account</li>
+      <li>Multi-user support</li>
+      <li>Role-based access control</li>
+      <li>Departments Access:</li>
+      <ul style="margin-left: 20px; color:#444;">
+        <li>Sales & Marketing</li>
+        <li>Procurement</li>
+        <li>Inventory</li>
+        <li>Logistics</li>
+        <li>Finance</li>
+        <li>Human Resources (HR)</li>
+        <li>Customer Service</li>
+        <li>IT</li>
+        <li>Operations Management</li>
+      </ul>
+    </ul>
+
+    <label for="plan">Choose Subscription Plan</label>
+    <select id="plan" onchange="updatePrice()" required>
+      <option value="" disabled selected>Select a plan</option>
+      <option value="6">6 Months – $237</option>
+      <option value="12">12 Months – $390</option>
+    </select>
+
+    <div class="price" id="priceDisplay">Select a plan to see pricing</div>
+
+    <label for="endDate">Subscription End Date</label>
+    <input type="date" id="endDate" required />
+
+    <button onclick="subscribeCompany(event)">Subscribe Now</button>
+  </div>
+
+  <!-- Floating WhatsApp Icon -->
+  <a href="https://wa.me/YOUR_PHONE_NUMBER_HERE" target="_blank" id="whatsappIcon" title="Chat with us on WhatsApp">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp Icon" />
+  </a>
+
+  <script>
+    const planPrices = {
+      6: 237,
+      12: 390
+    };
+
+    let companyId = null;
+    let username = null;
+
+    function updatePrice() {
+      const plan = document.getElementById('plan').value;
+      const price = planPrices[plan];
+      document.getElementById('priceDisplay').innerText = plan 
+        ? `You will pay $${price} for ${plan} months.` 
+        : 'Select a plan to see pricing';
+    }
+
+    async function subscribeCompany(e) {
+      e.preventDefault();
+
+      if (!companyId) {
+        alert("Company ID not found. Please log in first.");
+        return;
+      }
+
+      const plan = document.getElementById('plan').value;
+      const endDate = document.getElementById('endDate').value;
+
+      if (!plan || !endDate) {
+        alert("Please select a plan and end date.");
+        return;
+      }
+
+      // Prepare subscription data to send to admin backend
+      const subscriptionData = {
+        companyId,
+        plan,
+        endDate,
+        username,
+      };
+
+      try {
+        const res = await fetch('http://localhost:5000/api/subscriptions/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(subscriptionData)
+        });
+
+        const data = await res.json();
+
+        alert(data.message || 'Subscription sent successfully!');
+      } catch (err) {
+        alert('Failed to send subscription. Try again later.');
+        console.error(err);
+      }
+    }
+
+    window.onload = () => {
+      username = localStorage.getItem('username');
+      companyId = localStorage.getItem('companyId');
+
+      const welcomeMsg = document.getElementById('welcomeMsg');
+      const companyInfo = document.getElementById('companyInfo');
+
+      if (username) {
+        welcomeMsg.innerText = `Welcome, ${username}!`;
+      } else {
+        welcomeMsg.innerText = "Welcome, Guest!";
+      }
+
+      if (companyId) {
+        companyInfo.innerText = `Your Company ID: ${companyId}`;
+      } else {
+        companyInfo.innerText = "Company not detected. Please log in first.";
+      }
+    };
+  </script>
+</body>
+</html>

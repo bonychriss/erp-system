@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple CRM</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 30px auto;
+      background: #f9fafb;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+
+    form {
+      background: #fff;
+      padding: 20px 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+      margin-bottom: 30px;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-top: 12px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+    }
+
+    button {
+      cursor: pointer;
+      background-color: #3498db;
+      color: white;
+      font-weight: 600;
+      border: none;
+      padding: 12px 22px;
+      border-radius: 5px;
+      font-size: 1rem;
+      margin-top: 15px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    #cancelEdit {
+      background-color: #e74c3c;
+      margin-left: 10px;
+    }
+
+    #cancelEdit:hover {
+      background-color: #c0392b;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 14px 15px;
+      text-align: left;
+      border-bottom: 1px solid #eaeaea;
+      vertical-align: top;
+      word-break: break-word;
+    }
+
+    th {
+      background-color: #2c3e50;
+      color: white;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    tr:hover {
+      background-color: #f1f6fb;
+    }
+
+    .error {
+      color: #e74c3c;
+      margin-top: 10px;
+      font-weight: 600;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        margin: 15px;
+      }
+      form {
+        padding: 15px;
+      }
+      th, td {
+        padding: 10px 8px;
+      }
+      button {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Simple CRM Dashboard</h1>
+
+  <form id="crmForm">
+    <input type="hidden" id="crmId" />
+    <label>Name (required):</label>
+    <input type="text" id="name" required />
+
+    <label>Email:</label>
+    <input type="email" id="email" />
+
+    <label>Phone:</label>
+    <input type="text" id="phone" />
+
+    <label>Status:</label>
+    <select id="status">
+      <option value="lead">Lead</option>
+      <option value="contacted">Contacted</option>
+      <option value="qualified">Qualified</option>
+      <option value="won">Won</option>
+      <option value="lost">Lost</option>
+    </select>
+
+    <label>Notes:</label>
+    <textarea id="notes" rows="3"></textarea>
+
+    <button type="submit">Add</button>
+    <button type="button" id="cancelEdit" style="display:none;">Cancel</button>
+  </form>
+
+  <div class="error" id="errorMsg"></div>
+
+  <table id="crmTable">
+    <thead>
+      <tr>
+        <th>Name</th><th>Email</th><th>Phone</th><th>Status</th><th>Notes</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+<script>
+  const apiUrl = 'http://localhost:5000/api/crm';
+  const form = document.getElementById('crmForm');
+  const errorMsg = document.getElementById('errorMsg');
+  const tbody = document.querySelector('#crmTable tbody');
+  const cancelBtn = document.getElementById('cancelEdit');
+
+  // Load CRM data from backend
+  async function loadCRM() {
+    errorMsg.textContent = '';
+    tbody.innerHTML = 'Loading...';
+    try {
+      const res = await fetch(apiUrl);
+      if (!res.ok) throw new Error('Failed to load CRM data');
+      const data = await res.json();
+      renderTable(data);
+    } catch (err) {
+      errorMsg.textContent = err.message;
+      tbody.innerHTML = '';
+    }
+  }
+
+  // Render CRM data in table
+  function renderTable(data) {
+    if (data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6">No CRM records found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    data.forEach(crm => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${crm.name}</td>
+        <td>${crm.email || ''}</td>
+        <td>${crm.phone || ''}</td>
+        <td>${crm.status}</td>
+        <td>${crm.notes || ''}</td>
+        <td>
+          <button onclick="editCRM(${crm.id}, '${crm.name}', '${crm.email}', '${crm.phone}', '${crm.status}', \`${crm.notes || ''}\`)">Edit</button>
+          <button onclick="deleteCRM(${crm.id})" style="color:red;">Delete</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Submit handler for add/update
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorMsg.textContent = '';
+
+    const id = document.getElementById('crmId').value;
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const status = document.getElementById('status').value;
+    const notes = document.getElementById('notes').value.trim();
+
+    const bodyData = { name, email, phone, status, notes };
+
+    try {
+      let res;
+      if (id) {
+        // Update existing
+        res = await fetch(`${apiUrl}/${id}`, {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(bodyData)
+        });
+      } else {
+        // Add new
+        res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(bodyData)
+        });
+      }
+      if (!res.ok) throw new Error('Failed to save CRM record');
+
+      form.reset();
+      document.getElementById('crmId').value = '';
+      form.querySelector('button[type="submit"]').textContent = 'Add';
+      cancelBtn.style.display = 'none';
+      loadCRM();
+    } catch (err) {
+      errorMsg.textContent = err.message;
+    }
+  });
+
+  // Edit CRM entry (populate form)
+  window.editCRM = (id, name, email, phone, status, notes) => {
+    document.getElementById('crmId').value = id;
+    document.getElementById('name').value = name;
+    document.getElementById('email').value = email;
+    document.getElementById('phone').value = phone;
+    document.getElementById('status').value = status;
+    document.getElementById('notes').value = notes;
+
+    form.querySelector('button[type="submit"]').textContent = 'Update';
+    cancelBtn.style.display = 'inline';
+    errorMsg.textContent = '';
+  };
+
+  // Cancel edit
+  cancelBtn.addEventListener('click', () => {
+    form.reset();
+    document.getElementById('crmId').value = '';
+    form.querySelector('button[type="submit"]').textContent = 'Add';
+    cancelBtn.style.display = 'none';
+    errorMsg.textContent = '';
+  });
+
+  // Delete CRM entry
+  window.deleteCRM = async (id) => {
+    if (!confirm('Delete this record?')) return;
+    errorMsg.textContent = '';
+    try {
+      const res = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Delete failed');
+      loadCRM();
+    } catch (err) {
+      errorMsg.textContent = err.message;
+    }
+  };
+
+  // Load CRM on page load
+  loadCRM();
+</script>
+</body>
+</html>
