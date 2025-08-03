@@ -4,7 +4,14 @@ const express = require('express');
 const router = express.Router();
 const { Procurement } = require('../models');
 const authMiddleware = require('../middleware/authMiddleware');
+const rateLimit = require('express-rate-limit');
 
+// Rate limiter for sensitive operations (e.g., delete)
+const deleteLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // limit each IP to 10 delete requests per windowMs
+  message: { message: 'Too many delete requests from this IP, please try again later.' }
+});
 // CREATE procurement (login required)
 router.post('/', authMiddleware, async (req, res) => {
   try {
@@ -74,7 +81,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
 });
 
 // DELETE procurement by ID
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', authMiddleware, deleteLimiter, async (req, res) => {
   try {
     const { id } = req.params;
 
